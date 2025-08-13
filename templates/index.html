@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+        .message { margin-bottom: 10px; }
+        .user { text-align: right; color: blue; }
+        .bot { text-align: left; color: green; }
+    </style>
+</head>
+<body>
+    <h1>Medical Chatbot</h1>
+    <div id="chat-box"></div>
+    <form id="chat-form">
+        <input type="text" id="user-input" style="width: 80%; padding: 8px;" placeholder="Ask a medical question...">
+        <button type="submit" style="width: 18%; padding: 8px;">Send</button>
+    </form>
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatBox = document.getElementById('chat-box');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = userInput.value;
+            if (question.trim() === '') return;
+
+            // Display user's message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = 'You: ' + question;
+            chatBox.appendChild(userMessage);
+
+            // Clear input and show loading message
+            userInput.value = '';
+            const botLoading = document.createElement('div');
+            botLoading.className = 'message bot';
+            botLoading.textContent = 'Bot: ...';
+            chatBox.appendChild(botLoading);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Send question to backend
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
+
+            const data = await response.json();
+
+            // Update the bot's response
+            botLoading.textContent = 'Bot: ' + data.answer;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script>
+</body>
+</html>
